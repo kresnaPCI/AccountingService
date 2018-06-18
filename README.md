@@ -1,11 +1,30 @@
 # Accounting Service
 
+## Installation
+
+To get the code up and running:
+
+```
+# Setup Env Config
+$ cp .env.dist .env  # Configure .env if needed
+
+# Run Composer
+$ composer install
+
+# Run Server
+$ php bin/console server:run
+
+```
 
 ## API
 
-The API will be described here.
+The Rest API mimics the same functionality and data structure that would be used through the message queue.
+
+This allows easier testing in development without needing to setup message queues and send messages.
 
 ### Invoice
+
+Invoices can be created and updated through the API.
 
 #### Create
 
