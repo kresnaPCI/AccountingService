@@ -1,0 +1,11 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+invoice_create:
+    path:     /account/{accountId}/invoice
+    controller: App\Controller\InvoiceController::create
+
+invoice_update_date:
+    path:     /account/{accountId}/invoice/{invoiceId}/date
+    controller: App\Controller\InvoiceController::updateDate

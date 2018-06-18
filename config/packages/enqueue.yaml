@@ -1,0 +1,10 @@
+enqueue:
+    transport:
+        default: '%env(ENQUEUE_DSN)%'
+#        sqs:
+#            key: null
+#            secret: null
+#            token: null
+#            region: 'ap-southeast-1'
+#            version: '2012-11-05'
+    client: ~
