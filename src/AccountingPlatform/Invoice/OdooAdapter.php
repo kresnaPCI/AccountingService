@@ -58,8 +58,8 @@ class OdooAdapter implements AdapterInterface
         // EACH SEARCH METHOD WE LIMIT ONLY 1 RECORD SO ITS OK TO HARDCODE THE INDEX = 0
         $currency = $this->client->search_read('res.currency', $criteria, $fields, 1);
         
-        if (isset($currency){
-            $data['currency_id'] => $currency[0]['id']
+        if (isset($currency)){
+            $data['currency_id'] = $currency[0]['id'];
         }
         $id = $this->client->create('account.invoice', $data);
         // SECOND CREATE INVOICE LINES/INVOICED PRODUCTS
