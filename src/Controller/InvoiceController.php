@@ -31,9 +31,12 @@ class InvoiceController extends Controller
 
         $invoice = $invoiceTransformer->transform($data);
 
-        $this->get('accounting.service.invoice')->create($invoice);
-
-        return new JsonResponse(['success' => true]);
+        $invoice_create = $this->get('accounting.service.invoice')->create($invoice);
+        if (empty($invoice_create)){
+            return new JsonResponse(['success' => false]);
+        }else{
+            return new JsonResponse(['success' => true]);
+        }
     }
 
     /**
