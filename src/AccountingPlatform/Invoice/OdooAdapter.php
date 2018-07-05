@@ -56,7 +56,6 @@ class OdooAdapter implements AdapterInterface
         // EACH SEARCH METHOD WE LIMIT ONLY 1 RECORD SO ITS OK TO HARDCODE THE INDEX = 0
         $partner_id = $invoice->getCustomerId();
         $partner = $this->odooClient->search_read('res.partner', [['id', '=', $partner_id],], $fields, 1);
-        // file_put_contents('aww.txt',print_r(sizeof($partner), true).PHP_EOL , FILE_APPEND | LOCK_EX);
         if (sizeof($partner)>0){
             $data['partner_id'] = $partner[0]['id'];
         }
@@ -73,7 +72,13 @@ class OdooAdapter implements AdapterInterface
 
         $id = $this->odooClient->create('account.invoice', $data);
         // SECOND CREATE INVOICE LINES/INVOICED PRODUCTS
-        // file_put_contents('print.txt',print_r($id, true).PHP_EOL , FILE_APPEND | LOCK_EX);
+
+        $invoice_id = $this->odooClient->search_read('account.invoice', [['id', '=', $id],], ['id', 'journal_id'], 1);
+
+        $invoice_journal_id = $invoice_id[0]['journal_id'];
+        $journal = $this->odooClient->search_read('account.journal', [['display_name', '=', $invoice_journal_id],], ['id', 'default_credit_account_id'], 1);
+        $default_credit_account_id = $journal[0]['default_credit_account_id'][0];
+
         $lineItems = $invoice->getLineItems();
         foreach ($lineItems as $lineItem) {
             // SEARCH PRODUCT BY ITS SKU
@@ -84,6 +89,7 @@ class OdooAdapter implements AdapterInterface
             $fields = ['id', 'description_sale'];
 
             $product = $this->odooClient->search_read('product.product', $criteria, $fields, 1);
+
             if (sizeof($product)){
                 $product_id = $product[0]['id'];
                 $name = $product[0]['description_sale'];
@@ -95,7 +101,7 @@ class OdooAdapter implements AdapterInterface
                 'invoice_id' => $id,
                 'product_id' => $product_id,
                 'name' => $name,
-                'account_id' => 17,
+                'account_id' => $default_credit_account_id,
                 'quantity' => $lineItem->getQuantity(),
                 'discount' => $lineItem->getDiscount(),
                 'price_unit' => $lineItem->getUnitPrice(),
