@@ -64,4 +64,8 @@ class InvoiceService
     {
         //
     }
+    public function cancelInvoice(int $invoice): bool
+    {
+        return $this->adapter->cancelInvoice($invoice);
+    }
 }

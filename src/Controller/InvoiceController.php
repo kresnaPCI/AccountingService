@@ -71,4 +71,14 @@ class InvoiceController extends Controller
         }
     }
 
+    public function cancelInvoice(Request $request, int $invoiceId): Response
+    {
+        $invoice_open = $this->get('accounting.service.invoice')->cancelInvoice($invoiceId);
+        if (empty($invoice_open)){
+            return new JsonResponse(['success' => false]);
+        }else{
+            return new JsonResponse(['success' => true]);
+        }
+    }
+
 }

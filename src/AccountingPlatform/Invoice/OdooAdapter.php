@@ -159,5 +159,15 @@ class OdooAdapter implements AdapterInterface
         return true;
     }
 
+    public function cancelInvoice(int $invoiceId): bool
+    {
+        $invoice = $this->odooClient->search_read('account.invoice', [['id', '=', $invoiceId],['state', 'in', ['open','draft']]]);
+        if(empty($invoice)){
+            return false;
+        }
+        $this->odooClient->methods('account.invoice', 'action_invoice_cancel',$invoice[0]['id']);
+        return true;
+    }
+
 
 }
