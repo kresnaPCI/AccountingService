@@ -52,7 +52,7 @@ class InvoiceService
 
     public function markPaid(): bool
     {
-        //
+        return $this->adapter->markPaid($invoice);
     }
 
     public function markPending(): bool

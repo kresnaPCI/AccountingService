@@ -9,3 +9,7 @@ invoice_create:
 invoice_update_date:
     path:     /account/{accountId}/invoice/{invoiceId}/date
     controller: App\Controller\InvoiceController::updateDate
+
+invoice_mark_paid:
+    path:     /account/{accountId}/invoice/{invoiceId}/{transactionId}
+    controller: App\Controller\InvoiceController::markPaid

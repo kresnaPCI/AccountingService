@@ -125,7 +125,7 @@ class OdooAdapter implements AdapterInterface
             
         }
        
-        file_put_contents('invoice_id.txt',print_r($id, true).PHP_EOL , FILE_APPEND | LOCK_EX);
+
         return true;
     }
 
@@ -143,6 +143,7 @@ class OdooAdapter implements AdapterInterface
     public function markPaid(string $accountId, int $invoiceId, string $transactionId, string $pdfLink): bool
     {
         // TODO: Implement markPaid() method.
+        file_put_contents('markpaid.txt',print_r($invoiceId, true).PHP_EOL , FILE_APPEND | LOCK_EX);
         return true;
     }
 
