@@ -17,3 +17,7 @@ invoice_mark_paid:
 cancel_invoice:
     path:     /cancel_invoice/{invoiceId}
     controller: App\Controller\InvoiceController::cancelInvoice
+
+credit_memo_create:
+    path:     /account/{accountId}/credit-memo
+    controller: App\Controller\CreditMemoController::create

@@ -9,6 +9,10 @@
 namespace App\AccountingPlatform;
 
 use App\AccountingPlatform\CreditMemo\AdapterInterface;
+use App\Command\CreditMemo\UpdateDateCommand;
+use App\Command\CreditMemo\UpdateRefundMethodCommand;
+use App\Command\CreditMemo\UpdateStatusCommand;
+use App\Model\CreditMemo;
 
 /**
  * Class CreditMemoService
@@ -30,4 +34,12 @@ class CreditMemoService
         $this->adapter = $accountingAdapter;
     }
 
+    /**
+     * @param Invoice $invoice
+     * @return bool
+     */
+    public function create(CreditMemo $creditMemo): bool
+    {
+        return $this->adapter->create($creditMemo);
+    }
 }

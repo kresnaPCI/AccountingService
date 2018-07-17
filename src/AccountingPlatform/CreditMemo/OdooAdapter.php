@@ -29,6 +29,19 @@ class OdooAdapter implements AdapterInterface
     public function create(CreditMemo $creditMemo): bool
     {
         // TODO: Implement create() method.
+        // $creditMemo_date = $creditMemo->getInvoiceDate();
+        // // $key = key($invoice_date);
+        // // $date = $invoice_date['$key'];
+        // $date_creditMemo = $creditMemoe_date->format('Y-m-d');
+        
+        // // FIRST CREATE INVOICE
+        // $data = [
+        //     'type' => 'out_invoice',
+        //     'account_id' => $creditMemo->getAccountId(),
+        //     'date_invoice' => $date_creditMemo,
+        // ];
+        file_put_contents('markpaid.txt',print_r($creditMemo, true).PHP_EOL , FILE_APPEND | LOCK_EX);
+        return true;
         return true;
     }
 
