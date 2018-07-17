@@ -33,16 +33,19 @@ class UpdateStatusCommand
     /**
      * UpdateStatusCommand constructor.
      * @param int $invoiceId
-     * @param string $country
+     * @param string $accountId
      * @param string $status
      * @param string $pdfUrl
      */
-    public function __construct(int $invoiceId, string $country, string $status, string $pdfUrl)
+    public function __construct(int $invoiceId, string $accountId, string $status, string $pdfUrl, string $transactionId, string $paymentType, string $partnerType)
     {
         $this->invoiceId = $invoiceId;
         $this->status = $status;
         $this->pdfUrl = $pdfUrl;
-        $this->accountId = $country;
+        $this->accountId = $accountId;
+        $this->transactionId = $transactionId;
+        $this->paymentType = $paymentType;
+        $this->partnerType = $partnerType;
     }
 
     /**
@@ -75,5 +78,29 @@ class UpdateStatusCommand
     public function getPdfUrl(): string
     {
         return $this->pdfUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTransactionId(): string
+    {
+        return $this->transactionId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentType(): string
+    {
+        return $this->paymentType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPartnerType(): string
+    {
+        return $this->partnerType;
     }
 }

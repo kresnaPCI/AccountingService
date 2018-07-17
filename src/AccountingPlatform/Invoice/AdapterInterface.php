@@ -35,7 +35,7 @@ interface AdapterInterface
      * @param string $pdfLink
      * @return bool
      */
-    public function markPaid(string $accountId, int $invoiceId, string $transactionId, string $pdfLink): bool;
+    ppublic function markPaid(string $accountId, int $invoiceId, string $transactionId, string $pdfLink, string $status, string $paymentType, string $partnerType): bool;
 
     /**
      * @param string $accountId
