@@ -50,9 +50,17 @@ class InvoiceService
         );
     }
 
-    public function markPaid(): bool
+    public function markPaid(UpdateStatusCommand $command): bool
     {
-        return $this->adapter->markPaid($invoice);
+        return $this->adapter->markPaid(
+            $command->getAccountId(),
+            $command->getInvoiceId(),
+            $command->getStatus(),
+            $command->getPdfUrl(),
+            $command->getTransactionId(),
+            $command->getPaymentType(),
+            $command->getPartnerType()
+        );
     }
 
     public function markPending(): bool

@@ -57,18 +57,8 @@ class InvoiceController extends Controller
      public function markPaid(Request $request, string $accountId, int $invoiceId, int $transactionId): Response
     {
         $data = json_decode($request->getContent(), true);
-        $data = array(
-            'accountId' => $accountId,
-            'invoiceId' => $invoiceId
-        );
-
-        file_put_contents('markpaiddata.txt',print_r($data, true).PHP_EOL , FILE_APPEND | LOCK_EX);
-        $invoice_paid = $this->get('accounting.service.invoice')->markPaid($accountId, $invoiceId, $transactionId);
-        if (empty($invoice_paid)){
-            return new JsonResponse(['success' => false]);
-        }else{
-            return new JsonResponse(['success' => true]);
-        }
+        $command = new UpdateStatusCommand($invoiceId, $accountId, $transactionId, $data['pdfUrl'], $data['status'], $data['payment_type'], $data['partner_type']);
+        $this->get('accounting.service.invoice')->markPaid($command);
     }
 
     public function cancelInvoice(Request $request, int $invoiceId): Response

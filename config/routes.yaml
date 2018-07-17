@@ -11,7 +11,7 @@ invoice_update_date:
     controller: App\Controller\InvoiceController::updateDate
 
 invoice_mark_paid:
-    path:     /account/{accountId}/invoice/{invoiceId}/{transactionId}
+    path:     /account/{accountId}/invoice/{invoiceId}/payment-journal/{transactionId}
     controller: App\Controller\InvoiceController::markPaid
 
 cancel_invoice:
