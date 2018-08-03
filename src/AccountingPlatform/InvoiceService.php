@@ -3,6 +3,7 @@
 namespace App\AccountingPlatform;
 
 use App\AccountingPlatform\Invoice\AdapterInterface;
+use App\Command\Invoice\MarkPaidCommand;
 use App\Command\Invoice\UpdateDateCommand;
 use App\Command\Invoice\UpdateStatusCommand;
 use App\Model\Invoice;
@@ -13,6 +14,9 @@ use App\Model\Invoice;
  */
 class InvoiceService
 {
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_PENDING = 'pending';
+
     /**
      * @var AdapterInterface
      */
@@ -50,18 +54,43 @@ class InvoiceService
         );
     }
 
-    public function markPaid(): bool
+    /**
+     * @param MarkPaidCommand $command
+     * @return bool
+     */
+    public function markPaid(MarkPaidCommand $command): bool
     {
-        //
+        return $this->adapter->markPaid(
+            $command->getAccountId(),
+            $command->getInvoiceId(),
+            $command->getTransactionId(),
+            $command->getPdfUrl()
+        );
     }
 
-    public function markPending(): bool
+    /**
+     * @param UpdateStatusCommand $command
+     * @return bool
+     */
+    public function updateStatus(UpdateStatusCommand $command): bool
     {
-        //
-    }
+        switch ($command->getStatus()) {
+            case self::STATUS_PENDING:
+                return $this->adapter->markPending(
+                    $command->getAccountId(),
+                    $command->getInvoiceId(),
+                    $command->getPdfUrl()
+                );
+                break;
+            case self::STATUS_CANCELLED:
+                return $this->adapter->markCancelled(
+                    $command->getAccountId(),
+                    $command->getInvoiceId(),
+                    $command->getPdfUrl()
+                );
+                break;
+        }
 
-    public function markCancelled(): bool
-    {
-        //
+        return false;
     }
 }

@@ -70,3 +70,36 @@ Body
 }
 ```
 
+#### Pay
+
+Request
+
+`POST /account/<accountId>/invoice/<invoiceId>/paid`
+
+Body
+
+```
+{
+	"transactionId": "123456780",
+	"pdfUrl": "http://invoices/invoice.pdf"
+}
+```
+
+#### Update Status
+
+Valid Status:
+- `cancelled`
+- `pending`
+
+Request
+
+`POST /account/<accountId>/invoice/<invoiceId>/status`
+
+Body
+
+```
+{
+	"status": "pending",
+	"pdfUrl": "http://invoices/invoice.pdf"
+}
+```

@@ -9,3 +9,11 @@ invoice_create:
 invoice_update_date:
     path:     /account/{accountId}/invoice/{invoiceId}/date
     controller: App\Controller\InvoiceController::updateDate
+
+invoice_pay:
+    path:     /account/{accountId}/invoice/{invoiceId}/pay
+    controller: App\Controller\InvoiceController::pay
+
+invoice_change_status:
+    path:     /account/{accountId}/invoice/{invoiceId}/status
+    controller: App\Controller\InvoiceController::changeStatus

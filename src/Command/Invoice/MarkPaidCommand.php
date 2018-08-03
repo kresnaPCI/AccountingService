@@ -1,15 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Command\Invoice;
 
 /**
- * Class UpdateStatusCommand
+ * Class MarkPaidCommand
  * @package App\Command\Invoice
  */
-class UpdateStatusCommand
+class MarkPaidCommand
 {
+    /**
+     * @var string
+     */
+    protected $accountId;
+
     /**
      * @var int
      */
@@ -18,12 +21,7 @@ class UpdateStatusCommand
     /**
      * @var string
      */
-    protected $accountId;
-
-    /**
-     * @var string
-     */
-    protected $status;
+    protected $transactionId;
 
     /**
      * @var string
@@ -31,18 +29,26 @@ class UpdateStatusCommand
     protected $pdfUrl;
 
     /**
-     * UpdateStatusCommand constructor.
+     * MarkPaidCommand constructor.
      * @param string $accountId
      * @param int $invoiceId
-     * @param string $status
+     * @param string $transactionId
      * @param string $pdfUrl
      */
-    public function __construct(string $accountId, int $invoiceId, string $status, string $pdfUrl)
+    public function __construct(string $accountId, int $invoiceId, string $transactionId, string $pdfUrl)
     {
         $this->accountId = $accountId;
         $this->invoiceId = $invoiceId;
-        $this->status = $status;
+        $this->transactionId = $transactionId;
         $this->pdfUrl = $pdfUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountId(): string
+    {
+        return $this->accountId;
     }
 
     /**
@@ -56,17 +62,9 @@ class UpdateStatusCommand
     /**
      * @return string
      */
-    public function getAccountId(): string
+    public function getTransactionId(): string
     {
-        return $this->accountId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatus(): string
-    {
-        return $this->status;
+        return $this->transactionId;
     }
 
     /**

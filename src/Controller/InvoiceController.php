@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Command\Invoice\MarkPaidCommand;
 use App\Command\Invoice\UpdateDateCommand;
 use App\Command\Invoice\UpdateStatusCommand;
 use App\Transformer\InvoiceTransformer;
@@ -51,4 +52,37 @@ class InvoiceController extends Controller
         return new JsonResponse(['success' => true]);
     }
 
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $invoiceId
+     * @return Response
+     */
+    public function pay(Request $request, string $accountId, int $invoiceId): Response
+    {
+        $body = json_decode($request->getContent(), true);
+
+        $command = new MarkPaidCommand($accountId, $invoiceId, $body['transactionId'], $body['pdfUrl']);
+
+        $this->get('accounting.service.invoice')->markPaid($command);
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $invoiceId
+     * @return Response
+     */
+    public function changeStatus(Request $request, string $accountId, int $invoiceId): Response
+    {
+        $body = json_decode($request->getContent(), true);
+
+        $command = new UpdateStatusCommand($accountId, $invoiceId, $body['status'], $body['pdfUrl']);
+
+        $success = $this->get('accounting.service.invoice')->updateStatus($command);
+
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
+    }
 }
