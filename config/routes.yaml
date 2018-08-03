@@ -17,3 +17,20 @@ invoice_mark_paid:
 cancel_invoice:
     path:     /cancel_invoice/{invoiceId}
     controller: App\Controller\InvoiceController::cancelInvoice
+
+credit_memo_create:
+    path:     /credit-memo/{invoiceId}
+    controller: App\Controller\CreditMemoController::create
+
+creditmemo_update_date:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/date
+    controller: App\Controller\CreditMemoController::updateDate
+
+creditmemo_mark_paid:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/payment-journal/{transactionId}
+    controller: App\Controller\CreditMemoController::markPaid
+
+cancel_creditmemo:
+    path:     /cancel_creditmemo/{creditMemoId}
+    controller: App\Controller\CreditMemoController::cancelCreditMemo
+

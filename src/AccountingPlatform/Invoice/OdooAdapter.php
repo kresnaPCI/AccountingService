@@ -151,7 +151,6 @@ class OdooAdapter implements AdapterInterface
             'paymentType' => $paymentType,
             'partnerType' => $partnerType
         ];
-        file_put_contents('markpaid.txt',print_r($data, true).PHP_EOL , FILE_APPEND | LOCK_EX);
         # ============================= SEARCH DATA INVOICE ============================== 
         $fields = ['id', 'number', 'partner_id', 'account_id', 'date_invoice', 'journal_id', 'state', 'amount_total'];
 

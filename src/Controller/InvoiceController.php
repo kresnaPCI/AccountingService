@@ -54,11 +54,13 @@ class InvoiceController extends Controller
         return new JsonResponse(['success' => true]);
     }
 
-     public function markPaid(Request $request, string $accountId, int $invoiceId, int $transactionId): Response
+    public function markPaid(Request $request, string $accountId, int $invoiceId, string $transactionId): Response
     {
         $data = json_decode($request->getContent(), true);
         $command = new UpdateStatusCommand($invoiceId, $accountId, $transactionId, $data['pdfUrl'], $data['status'], $data['payment_type'], $data['partner_type']);
         $this->get('accounting.service.invoice')->markPaid($command);
+
+        return new JsonResponse(['success' => true]);
     }
 
     public function cancelInvoice(Request $request, int $invoiceId): Response
