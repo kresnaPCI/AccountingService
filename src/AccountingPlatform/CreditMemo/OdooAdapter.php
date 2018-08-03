@@ -48,7 +48,7 @@ class OdooAdapter implements AdapterInterface
         return true;
     }
 
-    public function markPaid(string $accountId, int $creditMemoId, string $transactionId, string $pdfLink): bool
+    public function markPaid(string $accountId, int $creditMemoId, string $method, string $transactionId, string $pdfLink): bool
     {
         // TODO: Implement markPaid() method.
         return true;

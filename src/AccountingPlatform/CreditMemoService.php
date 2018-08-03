@@ -9,6 +9,7 @@
 namespace App\AccountingPlatform;
 
 use App\AccountingPlatform\CreditMemo\AdapterInterface;
+use App\Command\CreditMemo\RefundCommand;
 use App\Model\CreditMemo;
 
 /**
@@ -40,4 +41,18 @@ class CreditMemoService
         return $this->adapter->create($creditMemo);
     }
 
+    /**
+     * @param RefundCommand $command
+     * @return bool
+     */
+    public function refund(RefundCommand $command): bool
+    {
+        return $this->adapter->markPaid(
+            $command->getAccountId(),
+            $command->getInvoiceId(),
+            $command->getMethod(),
+            $command->getTransactionId(),
+            $command->getPdfUrl()
+        );
+    }
 }

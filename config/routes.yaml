@@ -26,3 +26,8 @@ creditmemo_create:
     path:     /account/{accountId}/creditmemo
     controller: App\Controller\CreditMemoController::create
     methods:    [POST]
+
+creditmemo_refund:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/refund
+    controller: App\Controller\CreditMemoController::refund
+    methods:    [POST]

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Command\CreditMemo\RefundCommand;
 use App\Transformer\CreditMemoTransformer;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,6 +29,29 @@ class CreditMemoController extends Controller
         $creditMemo = $creditMemoTransformer->transform($data);
 
         $this->get('accounting.service.creditmemo')->create($creditMemo);
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $creditMemoId
+     * @return Response
+     */
+    public function refund(Request $request, string $accountId, int $creditMemoId): Response
+    {
+        $body = json_decode($request->getContent(), true);
+
+        $command = new RefundCommand(
+            $accountId,
+            $creditMemoId,
+            $body['method'],
+            $body['transactionId'],
+            $body['pdfUrl']
+        );
+
+        $this->get('accounting.service.creditmemo')->refund($command);
 
         return new JsonResponse(['success' => true]);
     }
