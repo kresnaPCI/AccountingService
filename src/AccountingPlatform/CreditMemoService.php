@@ -9,6 +9,7 @@
 namespace App\AccountingPlatform;
 
 use App\AccountingPlatform\CreditMemo\AdapterInterface;
+use App\Model\CreditMemo;
 
 /**
  * Class CreditMemoService
@@ -28,6 +29,15 @@ class CreditMemoService
     public function __construct(AdapterInterface $accountingAdapter)
     {
         $this->adapter = $accountingAdapter;
+    }
+
+    /**
+     * @param CreditMemo $creditMemo
+     * @return bool
+     */
+    public function create(CreditMemo $creditMemo): bool
+    {
+        return $this->adapter->create($creditMemo);
     }
 
 }

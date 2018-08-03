@@ -204,6 +204,24 @@ class CreditMemo
     /**
      * @return string
      */
+    public function getRefundTransactionId(): string
+    {
+        return $this->refundTransactionId;
+    }
+
+    /**
+     * @param string $refundTransactionId
+     * @return CreditMemo
+     */
+    public function setRefundTransactionId(string $refundTransactionId): CreditMemo
+    {
+        $this->refundTransactionId = $refundTransactionId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getAccountId(): string
     {
         return $this->accountId;

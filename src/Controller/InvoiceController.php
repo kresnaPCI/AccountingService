@@ -22,6 +22,7 @@ class InvoiceController extends Controller
 {
     /**
      * @param Request $request
+     * @param string $accountId
      * @param InvoiceTransformer $invoiceTransformer
      * @return Response
      */

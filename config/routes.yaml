@@ -5,15 +5,24 @@
 invoice_create:
     path:     /account/{accountId}/invoice
     controller: App\Controller\InvoiceController::create
+    methods:    [POST]
 
 invoice_update_date:
     path:     /account/{accountId}/invoice/{invoiceId}/date
     controller: App\Controller\InvoiceController::updateDate
+    methods:    [POST]
 
 invoice_pay:
     path:     /account/{accountId}/invoice/{invoiceId}/pay
     controller: App\Controller\InvoiceController::pay
+    methods:    [POST]
 
 invoice_change_status:
     path:     /account/{accountId}/invoice/{invoiceId}/status
     controller: App\Controller\InvoiceController::changeStatus
+    methods:    [POST]
+
+creditmemo_create:
+    path:     /account/{accountId}/creditmemo
+    controller: App\Controller\CreditMemoController::create
+    methods:    [POST]
