@@ -29,20 +29,6 @@ interface AdapterInterface
     /**
      * @param string $accountId
      * @param int $creditMemoId
-     * @param string $refundMethod
-     * @param string $pdfLink
-     * @return bool
-     */
-    public function updateRefundMethod(
-        string $accountId,
-        int $creditMemoId,
-        string $refundMethod,
-        string $pdfLink
-    ): bool;
-
-    /**
-     * @param string $accountId
-     * @param int $creditMemoId
      * @param string $method
      * @param string $transactionId
      * @param string $pdfLink

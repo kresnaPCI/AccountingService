@@ -128,12 +128,27 @@ Body
 	"orderIncrementId": "CD/12345",
 	"refundMethod": "omise",
 	"refundTransactionId": "rfnd_123234",
-	"pdfUrl": "http://invoices/invoice.pdf",
+	"pdfUrl": "http://creditmemos/invoice.pdf",
 	"status": "refunded",
 	"lineItems": [
 		{"sku": "abc123", "unitPrice": 1.25, "quantity": 123, "taxRate": 7, "taxIdentifier": "VAT", "discount": 0},
 		{"sku": "abc124", "unitPrice": 1.5, "quantity": 100, "taxRate": 7, "taxIdentifier": "VAT", "discount": 10}
 	]
+}
+```
+
+#### Update Date
+
+Request
+
+`POST /account/<accountId>/creditmemo/<creditMemoId>/date`
+
+Body
+
+```
+{
+	"date": "2018-06-01T12:34:56+07:00",
+	"pdfUrl": "http://creditmemos/invoice.pdf"
 }
 ```
 
@@ -149,6 +164,26 @@ Body
 {
 	"method": "omise",
 	"transactionId": "rfnd_123234",
-	"pdfUrl": "http://invoices/invoice.pdf"
+	"pdfUrl": "http://creditmemos/invoice.pdf"
+}
+```
+
+
+#### Update Status
+
+Valid Status:
+- `cancelled`
+- `pending`
+
+Request
+
+`POST /account/<accountId>/creditmemo/<creditMemoId>/status`
+
+Body
+
+```
+{
+	"status": "pending",
+	"pdfUrl": "http://creditmemos/invoice.pdf"
 }
 ```

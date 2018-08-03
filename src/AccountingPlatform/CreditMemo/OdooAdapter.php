@@ -38,16 +38,6 @@ class OdooAdapter implements AdapterInterface
         return true;
     }
 
-    public function updateRefundMethod(
-        string $accountId,
-        int $creditMemoId,
-        string $refundMethod,
-        string $pdfLink
-    ): bool {
-        // TODO: Implement updateRefundMethod() method.
-        return true;
-    }
-
     public function markPaid(string $accountId, int $creditMemoId, string $method, string $transactionId, string $pdfLink): bool
     {
         // TODO: Implement markPaid() method.
@@ -65,6 +55,4 @@ class OdooAdapter implements AdapterInterface
         // TODO: Implement markCancelled() method.
         return true;
     }
-
-
 }

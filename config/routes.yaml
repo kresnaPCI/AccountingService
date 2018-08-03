@@ -27,7 +27,17 @@ creditmemo_create:
     controller: App\Controller\CreditMemoController::create
     methods:    [POST]
 
+creditmemo_update_date:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/date
+    controller: App\Controller\CreditMemoController::updateDate
+    methods:    [POST]
+
 creditmemo_refund:
     path:     /account/{accountId}/creditmemo/{creditMemoId}/refund
     controller: App\Controller\CreditMemoController::refund
+    methods:    [POST]
+
+creditmemo_change_status:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/status
+    controller: App\Controller\CreditMemoController::changeStatus
     methods:    [POST]
