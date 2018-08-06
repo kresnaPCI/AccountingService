@@ -2,9 +2,9 @@
 
 namespace App\AccountingPlatform\CreditMemo;
 
+use App\AccountingPlatform\Library\OdooClient;
 use App\Model\CreditMemo;
 use DateTime;
-use OdooClient\Client;
 
 /**
  * Class OdooAdapter
@@ -13,15 +13,15 @@ use OdooClient\Client;
 class OdooAdapter implements AdapterInterface
 {
     /**
-     * @var Client
+     * @var OdooClient
      */
     protected $odooClient;
 
     /**
      * OdooAdapter constructor.
-     * @param Client $odooClient
+     * @param OdooClient $odooClient
      */
-    public function __construct(Client $odooClient)
+    public function __construct(OdooClient $odooClient)
     {
         $this->odooClient = $odooClient;
     }

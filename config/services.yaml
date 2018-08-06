@@ -28,7 +28,7 @@ services:
 
     # OdooClient
     service.library.odoo_client:
-        class: OdooClient\Client
+        class: App\AccountingPlatform\Library\OdooClient
         arguments:
           - '%env(ODOO_HOST)%'
           - '%env(ODOO_DB)%'
