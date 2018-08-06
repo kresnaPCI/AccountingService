@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Controller;
 
+use App\Command\CreditMemo\RefundCommand;
 use App\Command\CreditMemo\UpdateDateCommand;
 use App\Command\CreditMemo\UpdateStatusCommand;
 use App\Transformer\CreditMemoTransformer;
@@ -14,28 +13,35 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class InvoiceController
+ * Class CreditMemoController
  * @package App\Controller
  */
 class CreditMemoController extends Controller
 {
     /**
      * @param Request $request
-     * @param InvoiceTransformer $invoiceTransformer
+     * @param string $accountId
+     * @param CreditMemoTransformer $creditMemoTransformer
      * @return Response
      */
-    public function create(Request $request, string $invoiceId, CreditMemoTransformer $creditMemoTransformer): Response
+    public function create(Request $request, string $accountId, CreditMemoTransformer $creditMemoTransformer): Response
     {
         $data = json_decode($request->getContent(), true);
-        $data['invoiceId'] = $invoiceId;
+        $data['accountId'] = $accountId;
 
-        $CreditMemo = $creditMemoTransformer->transform($data);
+        $creditMemo = $creditMemoTransformer->transform($data);
 
-        $CreditAdpater = $this->get('accounting.service.creditmemo')->create($CreditMemo);
-        return new JsonResponse(['success' => $CreditAdpater]);
+        $this->get('accounting.service.creditmemo')->create($creditMemo);
+
+        return new JsonResponse(['success' => true]);
     }
 
-
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $creditMemoId
+     * @return Response
+     */
     public function updateDate(Request $request, string $accountId, int $creditMemoId): Response
     {
         $body = json_decode($request->getContent(), true);
@@ -45,28 +51,46 @@ class CreditMemoController extends Controller
         $this->get('accounting.service.creditmemo')->updateDate($command);
 
         return new JsonResponse(['success' => true]);
-
     }
 
-
-    public function markPaid(Request $request, string $accountId, int $creditMemoId, string $transactionId): Response
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $creditMemoId
+     * @return Response
+     */
+    public function refund(Request $request, string $accountId, int $creditMemoId): Response
     {
-        $data = json_decode($request->getContent(), true);
-        $command = new UpdateStatusCommand($creditMemoId, $accountId, $transactionId, $data['pdfUrl'], $data['status'], $data['payment_type'], $data['partner_type']);
-        $this->get('accounting.service.creditmemo')->markPaid($command);
+        $body = json_decode($request->getContent(), true);
 
-         return new JsonResponse(['success' => true]);
+        $command = new RefundCommand(
+            $accountId,
+            $creditMemoId,
+            $body['method'],
+            $body['transactionId'],
+            $body['pdfUrl']
+        );
+
+        $this->get('accounting.service.creditmemo')->refund($command);
+
+        return new JsonResponse(['success' => true]);
     }
 
-    
-    public function cancelCreditMemo(Request $request, int $creditMemoId): Response
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $creditMemoId
+     * @return Response
+     */
+    public function changeStatus(Request $request, string $accountId, int $creditMemoId): Response
     {
-        $memo_open = $this->get('accounting.service.creditmemo')->cancelCreditMemo($creditMemoId);
-        if (empty($memo_open)){
-            return new JsonResponse(['success' => false]);
-        }else{
-            return new JsonResponse(['success' => true]);
-        }
+        $body = json_decode($request->getContent(), true);
+
+        $command = new UpdateStatusCommand($accountId, $creditMemoId, $body['status'], $body['pdfUrl']);
+
+        $success = $this->get('accounting.service.creditmemo')->updateStatus($command);
+
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
 }

@@ -1,14 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
-
-
 namespace App\Command\CreditMemo;
 
 /**
  * Class UpdateStatusCommand
- * @package App\Command\Invoice
+ * @package App\Command\CreditMemo
  */
 class UpdateStatusCommand
 {
@@ -34,26 +30,23 @@ class UpdateStatusCommand
 
     /**
      * UpdateStatusCommand constructor.
-     * @param int $invoiceId
-     * @param string $accountId accountId
+     * @param string $accountId
+     * @param int $creditMemoId
      * @param string $status
      * @param string $pdfUrl
      */
-    public function __construct(int $creditMemoId, string $accountId, string $transactionId, string $pdfUrl, string $status, string $paymentType, string $partnerType)
+    public function __construct(string $accountId, int $creditMemoId, string $status, string $pdfUrl)
     {
+        $this->accountId = $accountId;
         $this->creditMemoId = $creditMemoId;
         $this->status = $status;
         $this->pdfUrl = $pdfUrl;
-        $this->accountId = $accountId;
-        $this->transactionId = $transactionId;
-        $this->paymentType = $paymentType;
-        $this->partnerType = $partnerType;
     }
 
     /**
      * @return int
      */
-    public function getcreditMemoId(): int
+    public function getCreditMemoId(): int
     {
         return $this->creditMemoId;
     }
@@ -80,29 +73,5 @@ class UpdateStatusCommand
     public function getPdfUrl(): string
     {
         return $this->pdfUrl;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTransactionId(): string
-    {
-        return $this->transactionId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPaymentType(): string
-    {
-        return $this->paymentType;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPartnerType(): string
-    {
-        return $this->partnerType;
     }
 }

@@ -5,32 +5,39 @@
 invoice_create:
     path:     /account/{accountId}/invoice
     controller: App\Controller\InvoiceController::create
+    methods:    [POST]
 
 invoice_update_date:
     path:     /account/{accountId}/invoice/{invoiceId}/date
     controller: App\Controller\InvoiceController::updateDate
+    methods:    [POST]
 
-invoice_mark_paid:
-    path:     /account/{accountId}/invoice/{invoiceId}/payment-journal/{transactionId}
-    controller: App\Controller\InvoiceController::markPaid
+invoice_pay:
+    path:     /account/{accountId}/invoice/{invoiceId}/pay
+    controller: App\Controller\InvoiceController::pay
+    methods:    [POST]
 
-cancel_invoice:
-    path:     /cancel_invoice/{invoiceId}
-    controller: App\Controller\InvoiceController::cancelInvoice
+invoice_change_status:
+    path:     /account/{accountId}/invoice/{invoiceId}/status
+    controller: App\Controller\InvoiceController::changeStatus
+    methods:    [POST]
 
-credit_memo_create:
-    path:     /credit-memo/{invoiceId}
+creditmemo_create:
+    path:     /account/{accountId}/creditmemo
     controller: App\Controller\CreditMemoController::create
+    methods:    [POST]
 
 creditmemo_update_date:
     path:     /account/{accountId}/creditmemo/{creditMemoId}/date
     controller: App\Controller\CreditMemoController::updateDate
+    methods:    [POST]
 
-creditmemo_mark_paid:
-    path:     /account/{accountId}/creditmemo/{creditMemoId}/payment-journal/{transactionId}
-    controller: App\Controller\CreditMemoController::markPaid
+creditmemo_refund:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/refund
+    controller: App\Controller\CreditMemoController::refund
+    methods:    [POST]
 
-cancel_creditmemo:
-    path:     /cancel_creditmemo/{creditMemoId}
-    controller: App\Controller\CreditMemoController::cancelCreditMemo
-
+creditmemo_change_status:
+    path:     /account/{accountId}/creditmemo/{creditMemoId}/status
+    controller: App\Controller\CreditMemoController::changeStatus
+    methods:    [POST]

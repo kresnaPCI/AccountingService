@@ -13,7 +13,7 @@ class CreditMemo
     /**
      * @var string
      */
-    protected $invoiceId;
+    protected $accountId;
 
     /**
      * @var int
@@ -100,7 +100,7 @@ class CreditMemo
     {
         return $this->orderId;
     }
-    
+
     /**
      * @param int $orderId
      * @return CreditMemo
@@ -204,18 +204,36 @@ class CreditMemo
     /**
      * @return string
      */
-    public function getInvoiceId(): string
+    public function getRefundTransactionId(): string
     {
-        return $this->invoiceId;
+        return $this->refundTransactionId;
     }
 
     /**
-     * @param string $invoiceId
+     * @param string $refundTransactionId
      * @return CreditMemo
      */
-    public function setInvoiceId(string $invoiceId): CreditMemo
+    public function setRefundTransactionId(string $refundTransactionId): CreditMemo
     {
-        $this->invoiceId = $invoiceId;
+        $this->refundTransactionId = $refundTransactionId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountId(): string
+    {
+        return $this->accountId;
+    }
+
+    /**
+     * @param string $accountId
+     * @return CreditMemo
+     */
+    public function setAccountId(string $accountId): CreditMemo
+    {
+        $this->accountId = $accountId;
         return $this;
     }
 
@@ -331,23 +349,5 @@ class CreditMemo
         }
 
         return $total;
-    }
-
-    /**
-     * @return int
-     */
-    public function getRefundTransactionId(): int
-    {
-        return $this->refundTransactionId;
-    }
-    
-    /**
-     * @param int $orderId
-     * @return CreditMemo
-     */
-    public function setRefundTransactionId(int $refundTransactionId): CreditMemo
-    {
-        $this->refundTransactionId = $refundTransactionId;
-        return $this;
     }
 }

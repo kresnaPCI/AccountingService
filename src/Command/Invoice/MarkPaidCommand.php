@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Command\CreditMemo;
-
-use DateTime;
+namespace App\Command\Invoice;
 
 /**
- * Class UpdateDateCommand
- * @package App\Command\CreditMemo
+ * Class MarkPaidCommand
+ * @package App\Command\Invoice
  */
-class UpdateDateCommand
+class MarkPaidCommand
 {
     /**
      * @var string
@@ -18,12 +16,12 @@ class UpdateDateCommand
     /**
      * @var int
      */
-    protected $creditMemoId;
+    protected $invoiceId;
 
     /**
-     * @var DateTime
+     * @var string
      */
-    protected $date;
+    protected $transactionId;
 
     /**
      * @var string
@@ -31,17 +29,17 @@ class UpdateDateCommand
     protected $pdfUrl;
 
     /**
-     * UpdateDateCommand constructor.
+     * MarkPaidCommand constructor.
      * @param string $accountId
-     * @param int $creditMemoId
-     * @param DateTime $date
+     * @param int $invoiceId
+     * @param string $transactionId
      * @param string $pdfUrl
      */
-    public function __construct(string $accountId, int $creditMemoId, DateTime $date, string $pdfUrl)
+    public function __construct(string $accountId, int $invoiceId, string $transactionId, string $pdfUrl)
     {
         $this->accountId = $accountId;
-        $this->creditMemoId = $creditMemoId;
-        $this->date = $date;
+        $this->invoiceId = $invoiceId;
+        $this->transactionId = $transactionId;
         $this->pdfUrl = $pdfUrl;
     }
 
@@ -56,17 +54,17 @@ class UpdateDateCommand
     /**
      * @return int
      */
-    public function getCreditMemoId(): int
+    public function getInvoiceId(): int
     {
-        return $this->creditMemoId;
+        return $this->invoiceId;
     }
 
     /**
-     * @return DateTime
+     * @return string
      */
-    public function getDate(): DateTime
+    public function getTransactionId(): string
     {
-        return $this->date;
+        return $this->transactionId;
     }
 
     /**

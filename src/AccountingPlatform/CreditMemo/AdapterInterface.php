@@ -29,20 +29,18 @@ interface AdapterInterface
     /**
      * @param string $accountId
      * @param int $creditMemoId
-     * @param string $refundMethod
-     * @param string $pdfLink
-     * @return bool
-     */
-    public function updateRefundMethod(string $accountId, int $creditMemoId, string $refundMethod, string $pdfLink): bool;
-
-    /**
-     * @param string $accountId
-     * @param int $creditMemoId
+     * @param string $method
      * @param string $transactionId
      * @param string $pdfLink
      * @return bool
      */
-    public function markPaid(string $accountId, int $creditMemoId, string $transactionId, string $pdfUrl, string $status, string $paymentType, string $partnerType): bool;
+    public function markPaid(
+        string $accountId,
+        int $creditMemoId,
+        string $method,
+        string $transactionId,
+        string $pdfLink
+    ): bool;
 
     /**
      * @param string $accountId

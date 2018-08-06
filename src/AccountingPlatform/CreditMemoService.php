@@ -9,8 +9,8 @@
 namespace App\AccountingPlatform;
 
 use App\AccountingPlatform\CreditMemo\AdapterInterface;
+use App\Command\CreditMemo\RefundCommand;
 use App\Command\CreditMemo\UpdateDateCommand;
-use App\Command\CreditMemo\UpdateRefundMethodCommand;
 use App\Command\CreditMemo\UpdateStatusCommand;
 use App\Model\CreditMemo;
 
@@ -20,6 +20,9 @@ use App\Model\CreditMemo;
  */
 class CreditMemoService
 {
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_PENDING = 'pending';
+
     /**
      * @var AdapterInterface
      */
@@ -35,7 +38,7 @@ class CreditMemoService
     }
 
     /**
-     * @param Invoice $invoice
+     * @param CreditMemo $creditMemo
      * @return bool
      */
     public function create(CreditMemo $creditMemo): bool
@@ -43,8 +46,48 @@ class CreditMemoService
         return $this->adapter->create($creditMemo);
     }
 
+    /**
+     * @param RefundCommand $command
+     * @return bool
+     */
+    public function refund(RefundCommand $command): bool
+    {
+        return $this->adapter->markPaid(
+            $command->getAccountId(),
+            $command->getInvoiceId(),
+            $command->getMethod(),
+            $command->getTransactionId(),
+            $command->getPdfUrl()
+        );
+    }
 
-     /**
+    /**
+     * @param UpdateStatusCommand $command
+     * @return bool
+     */
+    public function updateStatus(UpdateStatusCommand $command): bool
+    {
+        switch ($command->getStatus()) {
+            case self::STATUS_PENDING:
+                return $this->adapter->markPending(
+                    $command->getAccountId(),
+                    $command->getCreditMemoId(),
+                    $command->getPdfUrl()
+                );
+                break;
+            case self::STATUS_CANCELLED:
+                return $this->adapter->markCancelled(
+                    $command->getAccountId(),
+                    $command->getCreditMemoId(),
+                    $command->getPdfUrl()
+                );
+                break;
+        }
+
+        return false;
+    }
+
+    /**
      * @param UpdateDateCommand $command
      * @return bool
      */
@@ -52,31 +95,9 @@ class CreditMemoService
     {
         return $this->adapter->updateDate(
             $command->getAccountId(),
-            $command->creditMemoId(),
+            $command->getCreditMemoId(),
             $command->getDate(),
             $command->getPdfUrl()
         );
-    }
-    
-    /**
-     * @param UpdateStatusCommand $command
-     * @return bool
-     */
-    public function markPaid(UpdateStatusCommand $command): bool
-    {
-        return $this->adapter->markPaid(
-            $command->getAccountId(),
-            $command->getcreditMemoId(),
-            $command->getStatus(),
-            $command->getPdfUrl(),
-            $command->getTransactionId(),
-            $command->getPaymentType(),
-            $command->getPartnerType()
-        );
-    }
-
-    public function cancelCreditMemo(int $creditMemoId): bool
-    {
-        return $this->adapter->cancelCreditMemo($creditMemoId);
     }
 }

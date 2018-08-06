@@ -5,7 +5,7 @@ namespace App\Transformer;
 use App\Model\CreditMemo;
 
 /**
- * Class InvoiceTransformer
+ * Class CreditMemoTransformer
  * @package App\Transformer
  */
 class CreditMemoTransformer
@@ -26,31 +26,31 @@ class CreditMemoTransformer
 
     /**
      * @param array $data
-     * @return Invoice
+     * @return CreditMemo
      */
     public function transform(array $data): CreditMemo
     {
-        $CreditMemo = new CreditMemo();
-        $CreditMemo->setInvoiceId($data['invoiceId'])
+        $invoice = new CreditMemo();
+        $invoice->setAccountId($data['accountId'])
             ->setCurrency($data['currency'])
-            ->setPdfUrl($data['pdfUrl'])
-            ->setStatus($data['status'])
             ->setCustomerId($data['customerId'])
-            ->setOrderId($data['orderId'])
-            ->setOrderIncrementId($data['orderIncrementId'])
-            ->setCreditMemoDate(new \DateTime($data['creditMemoDate']))
             ->setCreditMemoId($data['creditMemoId'])
             ->setCreditMemoIncrementId($data['creditMemoIncrementId'])
+            ->setCreditMemoDate(new \DateTime($data['creditMemoDate']))
+            ->setOrderId($data['orderId'])
+            ->setOrderIncrementId($data['orderIncrementId'])
             ->setRefundMethod($data['refundMethod'])
-            ->setRefundTransactionId($data['refundTransactionId']);
+            ->setRefundTransactionId($data['refundTransactionId'])
+            ->setPdfUrl($data['pdfUrl'])
+            ->setStatus($data['status']);
         
         $lineItems = [];
         foreach ($data['lineItems'] as $line) {
             $lineItems[] = $this->lineItemTransformer->transform($line);
         }
 
-        $CreditMemo->setLineItems($lineItems);
+        $invoice->setLineItems($lineItems);
         
-        return $CreditMemo;
+        return $invoice;
     }
 }

@@ -1,4 +1,7 @@
 {
+    "aws/aws-sdk-php": {
+        "version": "3.64.4"
+    },
     "darkaonline/ripcord": {
         "version": "v0.1.6"
     },
@@ -26,6 +29,27 @@
     "enqueue/null": {
         "version": "0.8.24"
     },
+    "enqueue/sqs": {
+        "version": "0.7",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "0.7",
+            "ref": "e40f50440ab50156c9409626653125812a4987a9"
+        }
+    },
+    "guzzlehttp/guzzle": {
+        "version": "6.3.3"
+    },
+    "guzzlehttp/promises": {
+        "version": "v1.3.1"
+    },
+    "guzzlehttp/psr7": {
+        "version": "1.4.2"
+    },
+    "mtdowling/jmespath.php": {
+        "version": "2.4.0"
+    },
     "paragonie/random_compat": {
         "version": "v2.0.15"
     },
@@ -34,6 +58,9 @@
     },
     "psr/container": {
         "version": "1.0.0"
+    },
+    "psr/http-message": {
+        "version": "1.0.1"
     },
     "psr/log": {
         "version": "1.0.2"

@@ -70,3 +70,120 @@ Body
 }
 ```
 
+#### Pay
+
+Request
+
+`POST /account/<accountId>/invoice/<invoiceId>/pay`
+
+Body
+
+```
+{
+	"transactionId": "123456780",
+	"pdfUrl": "http://invoices/invoice.pdf"
+}
+```
+
+#### Update Status
+
+Valid Status:
+- `cancelled`
+- `pending`
+
+Request
+
+`POST /account/<accountId>/invoice/<invoiceId>/status`
+
+Body
+
+```
+{
+	"status": "pending",
+	"pdfUrl": "http://invoices/invoice.pdf"
+}
+```
+
+
+### Credit Memo
+
+Credit Memos can be created and updated through the API.
+
+#### Create
+
+Request
+
+`POST /account/<accountId>/creditmemo`
+
+Body
+
+```
+{
+	"customerId": 1234,
+	"currency": "thb",
+	"creditMemoId": 1234,
+	"creditMemoIncrementId": "AB/12345",
+	"creditMemoDate": "2018-06-01T12:34:56+07:00",
+	"orderId": 1234,
+	"orderIncrementId": "CD/12345",
+	"refundMethod": "omise",
+	"refundTransactionId": "rfnd_123234",
+	"pdfUrl": "http://creditmemos/invoice.pdf",
+	"status": "refunded",
+	"lineItems": [
+		{"sku": "abc123", "unitPrice": 1.25, "quantity": 123, "taxRate": 7, "taxIdentifier": "VAT", "discount": 0},
+		{"sku": "abc124", "unitPrice": 1.5, "quantity": 100, "taxRate": 7, "taxIdentifier": "VAT", "discount": 10}
+	]
+}
+```
+
+#### Update Date
+
+Request
+
+`POST /account/<accountId>/creditmemo/<creditMemoId>/date`
+
+Body
+
+```
+{
+	"date": "2018-06-01T12:34:56+07:00",
+	"pdfUrl": "http://creditmemos/invoice.pdf"
+}
+```
+
+#### Refund
+
+Request
+
+`POST /account/<accountId>/creditmemo/<creditMemoId>/refund`
+
+Body
+
+```
+{
+	"method": "omise",
+	"transactionId": "rfnd_123234",
+	"pdfUrl": "http://creditmemos/invoice.pdf"
+}
+```
+
+
+#### Update Status
+
+Valid Status:
+- `cancelled`
+- `pending`
+
+Request
+
+`POST /account/<accountId>/creditmemo/<creditMemoId>/status`
+
+Body
+
+```
+{
+	"status": "pending",
+	"pdfUrl": "http://creditmemos/invoice.pdf"
+}
+```

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Command\Invoice\MarkPaidCommand;
 use App\Command\Invoice\UpdateDateCommand;
 use App\Command\Invoice\UpdateStatusCommand;
 use App\Transformer\InvoiceTransformer;
@@ -21,6 +22,7 @@ class InvoiceController extends Controller
 {
     /**
      * @param Request $request
+     * @param string $accountId
      * @param InvoiceTransformer $invoiceTransformer
      * @return Response
      */
@@ -31,12 +33,9 @@ class InvoiceController extends Controller
 
         $invoice = $invoiceTransformer->transform($data);
 
-        $invoice_create = $this->get('accounting.service.invoice')->create($invoice);
-        if (empty($invoice_create)){
-            return new JsonResponse(['success' => false]);
-        }else{
-            return new JsonResponse(['success' => true]);
-        }
+        $this->get('accounting.service.invoice')->create($invoice);
+
+        return new JsonResponse(['success' => true]);
     }
 
     /**
@@ -54,23 +53,37 @@ class InvoiceController extends Controller
         return new JsonResponse(['success' => true]);
     }
 
-    public function markPaid(Request $request, string $accountId, int $invoiceId, string $transactionId): Response
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $invoiceId
+     * @return Response
+     */
+    public function pay(Request $request, string $accountId, int $invoiceId): Response
     {
-        $data = json_decode($request->getContent(), true);
-        $command = new UpdateStatusCommand($invoiceId, $accountId, $transactionId, $data['pdfUrl'], $data['status'], $data['payment_type'], $data['partner_type']);
+        $body = json_decode($request->getContent(), true);
+
+        $command = new MarkPaidCommand($accountId, $invoiceId, $body['transactionId'], $body['pdfUrl']);
+
         $this->get('accounting.service.invoice')->markPaid($command);
 
         return new JsonResponse(['success' => true]);
     }
 
-    public function cancelInvoice(Request $request, int $invoiceId): Response
+    /**
+     * @param Request $request
+     * @param string $accountId
+     * @param int $invoiceId
+     * @return Response
+     */
+    public function changeStatus(Request $request, string $accountId, int $invoiceId): Response
     {
-        $invoice_open = $this->get('accounting.service.invoice')->cancelInvoice($invoiceId);
-        if (empty($invoice_open)){
-            return new JsonResponse(['success' => false]);
-        }else{
-            return new JsonResponse(['success' => true]);
-        }
-    }
+        $body = json_decode($request->getContent(), true);
 
+        $command = new UpdateStatusCommand($accountId, $invoiceId, $body['status'], $body['pdfUrl']);
+
+        $success = $this->get('accounting.service.invoice')->updateStatus($command);
+
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
+    }
 }
