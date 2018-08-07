@@ -14,8 +14,8 @@ use DateTime;
  */
 class OdooAdapter implements AdapterInterface
 {
-    const PARTNER_TYPE = '';
-    const PAYMENT_TYPE = '';
+    const PARTNER_TYPE = 'customer';
+    const PAYMENT_TYPE = 'inbound';
 
     /**
      * @var OdooClient
@@ -46,6 +46,11 @@ class OdooAdapter implements AdapterInterface
             'type' => 'out_invoice',
             'account_id' => $invoice->getAccountId(),
             'date_invoice' => $date_invoice,
+            'pdfurl' => $invoice->getPdfUrl(),
+            'name' => $invoice->getOrderIncrementId(),
+            'magento_so' => $invoice->getOrderId(),
+            'magento_invoice_id' => $invoice->getInvoiceId(),
+            'magento_increment_id' => $invoice->getInvoiceIncrementId(),
         ];
         // file_put_contents('print.txt',print_r($data, true).PHP_EOL , FILE_APPEND | LOCK_EX);
         $criteria = [
@@ -139,8 +144,18 @@ class OdooAdapter implements AdapterInterface
         $update_invoice_date = $date->format('Y-m-d');
         $data = [
             'date_invoice' => $update_invoice_date,
+            'pdfurl' => $pdfLink,
         ];
-        $this->odooClient->write('account.invoice', $invoiceId, $data);
+        
+        $search_data = [
+            ['magento_invoice_id', '=', $invoiceId], 
+            ['account_id', '=', (int)$accountId],
+        ];
+        $invoice = $this->odooClient->search_read(
+            'account.invoice', $search_data, ['id','magento_invoice_id', 'account_id']
+        );
+        // file_put_contents('products.txt',print_r($invoice, true).PHP_EOL , FILE_APPEND | LOCK_EX);
+        $this->odooClient->write('account.invoice', $invoice[0]['id'], $data);
         return true;
     }
 
@@ -162,10 +177,14 @@ class OdooAdapter implements AdapterInterface
         ];
         # ============================= SEARCH DATA INVOICE ==============================
         $fields = ['id', 'number', 'partner_id', 'account_id', 'date_invoice', 'journal_id', 'state', 'amount_total'];
-
-        $invoice = $this->odooClient->search_read('account.invoice', [['id', '=', $invoiceId],], $fields, 1);
+        $search_data = [
+            ['magento_invoice_id', '=', $data['invoiceId']], 
+            ['account_id', '=', (int)$data['accountId']],
+        ];
+        $invoice = $this->odooClient->search_read('account.invoice', $search_data, $fields, 1);
+        // file_put_contents('products.txt',print_r($invoice, true).PHP_EOL , FILE_APPEND | LOCK_EX);
         $invoice_action = $this->odooClient->methods('account.invoice', 'action_invoice_open', $invoice[0]['id']);
-        $invoice = $this->odooClient->search_read('account.invoice', [['id', '=', $invoiceId],], $fields, 1);
+        $invoice = $this->odooClient->search_read('account.invoice', $search_data, $fields, 1);
 
         $invoice_partner_id = $invoice[0]['partner_id'][0];
         $invoice_account_id = $invoice[0]['account_id'][0];
@@ -206,6 +225,30 @@ class OdooAdapter implements AdapterInterface
     public function markPending(string $accountId, int $invoiceId, string $pdfLink): bool
     {
         // TODO: Implement markPending() method.
+        $data = [
+            'pdfurl' => $pdfLink,
+        ];
+        $search_data = [
+            ['magento_invoice_id', '=', $invoiceId], 
+            ['account_id', '=', (int)$accountId],
+            ['state', 'in', ['paid']],
+        ];
+        $invoice = $this->odooClient->search_read('account.invoice', $search_data, ['id', 'move_id']);
+        if (empty($invoice)) {
+            return false;
+        }
+        # JOURNAL ENTRY
+        $move_id = $invoice[0]['move_id'][0];
+        $account_move = $this->odooClient->search_read('account.move', [['id', '=', $move_id]], ['id', 'line_ids']);
+        
+        # JOURNAL ITEMS
+        $move_line = $account_move[0]['line_ids'];
+        foreach ($move_line as $movelineid) {
+            $account_move_line = $this->odooClient->search_read('account.move.line', [['id', '=', $movelineid]], ['id']);
+            $this->odooClient->methods('account.move.line', 'remove_move_reconcile', $account_move_line[0]['id']);
+        }
+        $this->odooClient->write('account.invoice', $invoice[0]['id'], $data);
+        // $this->odooClient->methods('account.invoice', 'action_invoice_cancel', $invoice[0]['id']);
         return true;
     }
 
@@ -214,15 +257,22 @@ class OdooAdapter implements AdapterInterface
      */
     public function markCancelled(string $accountId, int $invoiceId, string $pdfLink): bool
     {
+        $data = [
+            'pdfurl' => $pdfLink,
+        ];
+        $search_data = [
+            ['magento_invoice_id', '=', $invoiceId], 
+            ['account_id', '=', (int)$accountId],
+            ['state', 'in', ['open', 'draft']],
+        ];
         $invoice = $this->odooClient->search_read(
-            'account.invoice',
-            [['id', '=', $invoiceId], ['state', 'in', ['open', 'draft']]]
+            'account.invoice', $search_data, ['id']
         );
 
         if (empty($invoice)) {
             return false;
         }
-
+        $this->odooClient->write('account.invoice', $invoice[0]['id'], $data);
         $this->odooClient->methods('account.invoice', 'action_invoice_cancel', $invoice[0]['id']);
 
         return true;
