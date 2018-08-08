@@ -96,6 +96,24 @@ class CreditMemo
     /**
      * @return int
      */
+    public function getJournal(): string
+    {
+        return $this->journalName;
+    }
+
+    /**
+     * @param int $journalName
+     * @return CreditMemo
+     */
+    public function setJournal(string $journalName): CreditMemo
+    {
+        $this->journalName = $journalName;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
     public function getOrderId(): int
     {
         return $this->orderId;
@@ -129,12 +147,48 @@ class CreditMemo
         return $this;
     }
 
+     /**
+     * @return int
+     */
+    public function getInvoiceId(): int
+    {
+        return $this->invoiceId;
+    }
+
+    /**
+     * @param int $invoiceId
+     * @return Invoice
+     */
+    public function setInvoiceId(int $invoiceId): Invoice
+    {
+        $this->invoiceId = $invoiceId;
+        return $this;
+    }
+
     /**
      * @return DateTime
      */
     public function getCreditMemoDate(): DateTime
     {
         return $this->creditMemoDate;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoiceIncrementId(): string
+    {
+        return $this->invoiceIncrementId;
+    }
+
+    /**
+     * @param string $invoiceIncrementId
+     * @return Invoice
+     */
+    public function setInvoiceIncrementId(string $invoiceIncrementId): Invoice
+    {
+        $this->invoiceIncrementId = $invoiceIncrementId;
+        return $this;
     }
 
     /**

@@ -28,15 +28,100 @@ class OdooAdapter implements AdapterInterface
 
     public function create(CreditMemo $creditMemo): bool
     {
-        $invoice = $this->odooClient->search_read(
-            'account.invoice',
-            [['id', '=', $creditMemo->getInvoiceId()], ['state', 'not in', ['draft', 'cancel']]]
-        );
+        $creditMemo_date = $creditMemo->getCreditMemoDate();
+        // $key = key($invoice_date);
+        // $date = $invoice_date['$key'];
+        $date_creditmemo = $creditMemo_date->format('Y-m-d');
+        // FIRST CREATE INVOICE
+        $data = [
+            'type' => 'out_refund',
+            'account_id' => $creditMemo->getAccountId(),
+            'date_invoice' => $date_creditmemo,
+            'pdfurl' => $creditMemo->getPdfUrl(),
+            'name' => $creditMemo->getOrderIncrementId(),
+            'magento_so' => $creditMemo->getOrderId(),
+            'magento_invoice_id' => $creditMemo->getCreditMemoId(),
+            'magento_increment_id' => $creditMemo->getCreditMemoIncrementId(),
+        ];
+        $criteria = [
+            ['name', '=ilike', $creditMemo->getCurrency()],
+        ];
 
-        if (empty($invoice)) {
+        $fields = ['id', 'active'];
+        // EACH SEARCH METHOD WE LIMIT ONLY 1 RECORD SO ITS OK TO HARDCODE THE INDEX = 0
+        $partner_id = $creditMemo->getCustomerId();
+        $partner = $this->odooClient->search_read('res.partner', [['id', '=', $partner_id],], $fields, 1);
+
+        if (sizeof($partner) > 0) {
+            $data['partner_id'] = $partner[0]['id'];
+        } else {
             return false;
         }
-        $this->odooClient->methods('account.invoice', 'refund', $invoice[0]['id']);
+
+        $journal_name = $creditMemo->getJournal();
+        $journal_id = $this->odooClient->search_read('account.journal', [['name', '=', $journal_name],], $fields, 1);
+        if (sizeof($journal_id) > 0) {
+            $data['journal_id'] = $journal_id[0]['id'];
+        } else {
+            trigger_error("you input wrong journal name, please correct it", E_USER_ERROR);
+        }
+
+        $currency = $this->odooClient->search_read('res.currency', $criteria, $fields, 1);
+        if (sizeof($currency)) {
+            $data['currency_id'] = $currency[0]['id'];
+        } else {
+            return false;
+        }
+
+        $id = $this->odooClient->create('account.invoice', $data);
+        // SECOND CREATE INVOICE LINES/INVOICED PRODUCTS
+        $getjournal = $this->odooClient->search_read('account.journal', [['id', '=', $journal_id[0]['id']],], ['id', 'default_credit_account_id'], 1);
+        $default_credit_account_id = $getjournal[0]['default_credit_account_id'];
+
+        $lineItems = $creditMemo->getLineItems();
+        foreach ($lineItems as $lineItem) {
+            // SEARCH PRODUCT BY ITS SKU
+            $criteria = [
+                ['default_code', '=', $lineItem->getSku()],
+            ];
+
+            $fields = ['id', 'description_sale'];
+
+            $product = $this->odooClient->search_read('product.product', $criteria, $fields, 1);
+
+            if (sizeof($product)) {
+                $product_id = $product[0]['id'];
+                $name = $product[0]['description_sale'];
+            } else {
+                return false;
+            }
+            $data_line = [
+                'invoice_id' => $id,
+                'product_id' => $product_id,
+                'name' => $name,
+                'account_id' => $default_credit_account_id[0],
+                'quantity' => $lineItem->getQuantity(),
+                'discount' => $lineItem->getDiscount(),
+                'price_unit' => $lineItem->getUnitPrice(),
+            ];
+            // SEARCH TAX MASTER DATA
+            $criteria = [
+                ['name', '=', $lineItem->getTaxIdentifier()],
+            ];
+
+            $fields = ['id'];
+
+            $tax = $this->odooClient->search_read('account.tax', $criteria, $fields, 1);
+            if (sizeof($tax)) {
+                $tax_ids = array(array(6, 0, array($tax[0]['id'])));
+            } else {
+                return false;
+            }
+            // IN ODOO, ORDER ITEMS CAN CONTAIN SEVERAL TAXES, SO WE NEED TO ASSIGN THE VALUE AS ARRAY AND ODOO FORMAT WHEN ASSIGNING VALUE TO MANY2MANY FIELD (6, 0, ARRAY OF ID VALUE)
+            $data_line['invoice_line_tax_ids'] = $tax_ids;
+            $line_id = $this->odooClient->create('account.invoice.line', $data_line);
+        }
+
         return true;
     }
 

@@ -41,6 +41,7 @@ class CreditMemoTransformer
             ->setOrderIncrementId($data['orderIncrementId'])
             ->setRefundMethod($data['refundMethod'])
             ->setRefundTransactionId($data['refundTransactionId'])
+            ->setJournal($data['journalName'])
             ->setPdfUrl($data['pdfUrl'])
             ->setStatus($data['status']);
         
