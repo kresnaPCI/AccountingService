@@ -122,20 +122,23 @@ Body
 
 ```
 {
-	"customerId": 1234,
+	"customerId": "gogoprint",
+	"customerName": "gogoprint",
+	"customerEmail": "gogoprint@a.com",
 	"currency": "thb",
-	"creditMemoId": 1234,
+	"creditMemoId": 1021,
 	"creditMemoIncrementId": "AB/12345",
-	"creditMemoDate": "2018-06-01T12:34:56+07:00",
+	"creditMemoDate": "2020-08-07T12:34:56+07:00",
 	"orderId": 1234,
 	"orderIncrementId": "CD/12345",
 	"refundMethod": "omise",
-	"refundTransactionId": "rfnd_123234",
-	"pdfUrl": "http://creditmemos/invoice.pdf",
-	"status": "refunded",
+	"journalName": "omise",
+	"refundTransactionId": "chrg_123234",
+	"pdfUrl": "http://invoices/invoice.pdf",
+	"status": "draft",
 	"lineItems": [
-		{"sku": "abc123", "unitPrice": 1.25, "quantity": 123, "taxRate": 7, "taxIdentifier": "VAT", "discount": 0},
-		{"sku": "abc124", "unitPrice": 1.5, "quantity": 100, "taxRate": 7, "taxIdentifier": "VAT", "discount": 10}
+		{"sku": "Business card", "unitPrice": 1.25, "quantity": 123, "taxRate": 7, "taxIdentifier": "VAT", "discount": 0},
+		{"sku": "Fliyers", "unitPrice": 1.5, "quantity": 100, "taxRate": 7, "taxIdentifier": "VAT", "discount": 10}
 	]
 }
 ```
