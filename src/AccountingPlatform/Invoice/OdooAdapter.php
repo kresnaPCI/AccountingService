@@ -74,6 +74,7 @@ class OdooAdapter implements AdapterInterface
             'name' => $invoice->getInvoiceIncrementId(),
         ];
 
+
         // Get or Create Customer
         if ($partner = $this->odooRepo->getCustomerByMagentoId($invoice->getCustomerId())) {
             $data['partner_id'] = $partner['id'];
@@ -91,7 +92,6 @@ class OdooAdapter implements AdapterInterface
         } else {
             return false;
         }
-
         // Create and Fetch Invoice
         $odooInvoiceId = $this->odooRepo->createInvoice($data);
         $odooInvoice = $this->odooRepo->getInvoice($odooInvoiceId);
@@ -197,10 +197,15 @@ class OdooAdapter implements AdapterInterface
     {
         $accountData = $this->dataFactory->getAccountData($accountId);
 
+
         $invoice = $this->odooRepo->getInvoiceByMagentoId($accountData->getAccountId(), $invoiceId);
 
-        if (!$invoice || !in_array($invoice['state'], ['open', 'draft'])) {
+        if (!$invoice || !in_array($invoice['state'], ['open', 'draft', 'paid'])) {
             return false;
+        }
+
+        if ($invoice['state'] == 'paid') {
+            $this->updateToPending($invoice);
         }
 
         $this->updateToCancelled($invoice);

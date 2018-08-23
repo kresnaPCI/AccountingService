@@ -197,8 +197,12 @@ class OdooAdapter implements AdapterInterface
 
         $creditMemo = $this->odooRepo->getCreditMemoByMagentoId($accountData->getAccountId(), $creditMemoId);
 
-        if (!$creditMemo || !in_array($creditMemo['state'], ['open', 'draft'])) {
+        if (!$creditMemo || !in_array($creditMemo['state'], ['open', 'draft', 'paid'])) {
             return false;
+        }
+
+        if ($creditMemo['state'] == 'paid') {
+            $this->updateToPending($creditMemo);
         }
 
         $this->updateToCancelled($creditMemo);
