@@ -1,5 +1,5 @@
 enqueue:
     async_events:
-        enabled: true
+        enabled: false
         # if you'd like to send send messages onTerminate use spool_producer (it makes response time even lesser):
         # spool_producer: true

@@ -7,4 +7,9 @@ enqueue:
             token: null
             region: 'ap-southeast-1'
             version: '2012-11-05'
-    client: ~
+    client:
+        app_name: null
+        prefix: null
+        router_queue: accounting_staging_invoice
+        default_processor_queue: accounting_staging_invoice
+

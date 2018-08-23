@@ -1,6 +1,17 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    odoo.accounts:
+        gogosg:
+            prefix: gogosg
+            account_id: 7
+            timezone: '+8'
+            product_id: 3
+        gogoth:
+            prefix: gogoth
+            account_id: 7
+            timezone: '+7'
+            product_id: 3
 
 services:
     # default configuration for services in *this* file
@@ -27,24 +38,38 @@ services:
     # please note that last definitions always *replace* previous ones
 
     # OdooClient
+    service.library.odoo_account_data_factory:
+        class: App\AccountingPlatform\Library\Odoo\OdooAccountDataFactory
+        arguments:
+         - '%odoo.accounts%'
+
     service.library.odoo_client:
-        class: App\AccountingPlatform\Library\OdooClient
+        class: App\AccountingPlatform\Library\Odoo\OdooClient
         arguments:
           - '%env(ODOO_HOST)%'
           - '%env(ODOO_DB)%'
           - '%env(ODOO_USER)%'
           - '%env(ODOO_PASS)%'
 
+    service.library.odoo_repository:
+        class: App\AccountingPlatform\Library\Odoo\OdooRepository
+        arguments:
+          - '@service.library.odoo_client'
+
     # Accounting Adapters
     accounting.adapter.creditmemo.odoo:
         class: App\AccountingPlatform\CreditMemo\OdooAdapter
         arguments:
           - '@service.library.odoo_client'
+          - '@service.library.odoo_repository'
+          - '@service.library.odoo_account_data_factory'
 
     accounting.adapter.invoice.odoo:
         class: App\AccountingPlatform\Invoice\OdooAdapter
         arguments:
           - '@service.library.odoo_client'
+          - '@service.library.odoo_repository'
+          - '@service.library.odoo_account_data_factory'
 
     accounting.service.creditmemo:
         class: App\AccountingPlatform\CreditMemoService
@@ -58,4 +83,35 @@ services:
           - '@accounting.adapter.invoice.odoo'
         public: true
 
+    queue.processor.invoice_create:
+        class: App\Queue\Processor\CreateInvoiceProcessor
+        arguments:
+         - '@accounting.service.invoice'
+         - '@App\Transformer\InvoiceTransformer'
+        tags:
+        - { name: 'enqueue.client.processor'}
+        public: true
 
+    queue.processor.invoice_pay:
+        class: App\Queue\Processor\PayInvoiceProcessor
+        arguments:
+        - '@accounting.service.invoice'
+        tags:
+        - { name: 'enqueue.client.processor'}
+        public: true
+
+    queue.processor.invoice_update_date:
+        class: App\Queue\Processor\UpdateInvoiceDateProcessor
+        arguments:
+        - '@accounting.service.invoice'
+        tags:
+        - { name: 'enqueue.client.processor'}
+        public: true
+
+    queue.processor.invoice_update_status:
+        class: App\Queue\Processor\UpdateInvoiceStatusProcessor
+        arguments:
+        - '@accounting.service.invoice'
+        tags:
+        - { name: 'enqueue.client.processor'}
+        public: true
