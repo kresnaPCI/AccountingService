@@ -36,21 +36,23 @@ Body
 
 ```
 {
-	"customerId": 1234,
-	"currency": "thb",
-	"invoiceId": 1234,
+	"customerId": "company-5",
+	"customerName": "cus5",
+	"customerEmail": "cus5@mail.com",
+	"currency": "myr",
+	"invoiceId": 46,
 	"invoiceIncrementId": "AB/12345",
-	"invoiceDate": "2018-06-01T12:34:56+07:00",
+	"invoiceDate": "2018-08-07T12:34:56+07:00",
 	"orderId": 1234,
 	"orderIncrementId": "CD/12345",
-	"orderDate": "2018-06-01T12:34:56+07:00",
+	"orderDate": "2018-08-06T12:34:56+07:00",
 	"paymentMethod": "omise",
 	"paymentTransactionId": "chrg_123234",
 	"pdfUrl": "http://invoices/invoice.pdf",
-	"status": "paid",
+	"status": "draft",
 	"lineItems": [
-		{"sku": "abc123", "unitPrice": 1.25, "quantity": 123, "taxRate": 7, "taxIdentifier": "VAT", "discount": 0},
-		{"sku": "abc124", "unitPrice": 1.5, "quantity": 100, "taxRate": 7, "taxIdentifier": "VAT", "discount": 10}
+		{"sku": "Business card", "unitPrice": 1.25, "quantity": 123, "taxRate": 7, "taxIdentifier": "VAT", "discount": 0},
+		{"sku": "Fliyers", "unitPrice": 1.5, "quantity": 100, "taxRate": 7, "taxIdentifier": "VAT", "discount": 10}
 	]
 }
 ```
@@ -81,7 +83,8 @@ Body
 ```
 {
 	"transactionId": "123456780",
-	"pdfUrl": "http://invoices/invoice.pdf"
+	"pdfUrl": "http://invoices/invoice.pdf",
+	"paymentMethod": "omise"
 }
 ```
 
