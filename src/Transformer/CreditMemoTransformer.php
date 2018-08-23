@@ -34,6 +34,8 @@ class CreditMemoTransformer
         $invoice->setAccountId($data['accountId'])
             ->setCurrency($data['currency'])
             ->setCustomerId($data['customerId'])
+            ->setCustomerName($data['customerName'])
+            ->setCustomerEmail($data['customerEmail'])
             ->setCreditMemoId($data['creditMemoId'])
             ->setCreditMemoIncrementId($data['creditMemoIncrementId'])
             ->setCreditMemoDate(new \DateTime($data['creditMemoDate']))

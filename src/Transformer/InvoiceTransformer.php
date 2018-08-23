@@ -34,6 +34,8 @@ class InvoiceTransformer
         $invoice->setAccountId($data['accountId'])
             ->setCurrency($data['currency'])
             ->setCustomerId($data['customerId'])
+            ->setCustomerName($data['customerName'])
+            ->setCustomerEmail($data['customerEmail'])
             ->setInvoiceId($data['invoiceId'])
             ->setInvoiceIncrementId($data['invoiceIncrementId'])
             ->setInvoiceDate(new \DateTime($data['invoiceDate']))

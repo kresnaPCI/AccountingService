@@ -31,9 +31,9 @@ class CreditMemoController extends Controller
 
         $creditMemo = $creditMemoTransformer->transform($data);
 
-        $this->get('accounting.service.creditmemo')->create($creditMemo);
+        $success = $this->get('accounting.service.creditmemo')->create($creditMemo);
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
     /**
@@ -48,9 +48,9 @@ class CreditMemoController extends Controller
 
         $command = new UpdateDateCommand($accountId, $creditMemoId, new DateTime($body['date']), $body['pdfUrl']);
 
-        $this->get('accounting.service.creditmemo')->updateDate($command);
+        $success = $this->get('accounting.service.creditmemo')->updateDate($command);
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
     /**
@@ -71,9 +71,9 @@ class CreditMemoController extends Controller
             $body['pdfUrl']
         );
 
-        $this->get('accounting.service.creditmemo')->refund($command);
+        $success = $this->get('accounting.service.creditmemo')->refund($command);
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
     /**

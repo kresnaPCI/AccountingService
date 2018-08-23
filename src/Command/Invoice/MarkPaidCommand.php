@@ -26,6 +26,11 @@ class MarkPaidCommand
     /**
      * @var string
      */
+    protected $paymetnMethod;
+
+    /**
+     * @var string
+     */
     protected $pdfUrl;
 
     /**
@@ -33,14 +38,16 @@ class MarkPaidCommand
      * @param string $accountId
      * @param int $invoiceId
      * @param string $transactionId
+     * @param string $paymentMethod
      * @param string $pdfUrl
      */
-    public function __construct(string $accountId, int $invoiceId, string $transactionId, string $pdfUrl)
+    public function __construct(string $accountId, int $invoiceId, string $transactionId, string $paymentMethod, string $pdfUrl)
     {
         $this->accountId = $accountId;
         $this->invoiceId = $invoiceId;
         $this->transactionId = $transactionId;
         $this->pdfUrl = $pdfUrl;
+        $this->paymentMethod = $paymentMethod;
     }
 
     /**
@@ -65,6 +72,14 @@ class MarkPaidCommand
     public function getTransactionId(): string
     {
         return $this->transactionId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentMethod(): string
+    {
+        return $this->paymentMethod;
     }
 
     /**

@@ -64,6 +64,7 @@ class InvoiceService
             $command->getAccountId(),
             $command->getInvoiceId(),
             $command->getTransactionId(),
+            $command->getPaymentMethod(),
             $command->getPdfUrl()
         );
     }

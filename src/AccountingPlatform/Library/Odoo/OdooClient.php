@@ -1,6 +1,6 @@
 <?php
 
-namespace App\AccountingPlatform\Library;
+namespace App\AccountingPlatform\Library\Odoo;
 
 use OdooClient\Client;
 

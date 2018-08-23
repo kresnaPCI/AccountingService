@@ -9,15 +9,29 @@ use DateTime;
  */
 class Invoice
 {
+    const STATUS_PAID = 'paid';
+    const STATUS_PENDING = 'pending';
+    const STATUS_CANCELLED = 'cancelled';
+
     /**
      * @var string
      */
     protected $accountId;
 
     /**
-     * @var int
+     * @var string
      */
     protected $customerId;
+
+    /**
+     * @var string
+     */
+    protected $customerName;
+
+    /**
+     * @var string
+     */
+    protected $customerEmail;
 
     /**
      * @var int
@@ -80,23 +94,57 @@ class Invoice
     protected $currency;
 
     /**
-     * @return int
+     * @return string
      */
-    public function getCustomerId(): int
+    public function getCustomerId(): string
     {
         return $this->customerId;
     }
 
     /**
-     * @param int $customerId
+     * @param string $customerId
      * @return Invoice
      */
-    public function setCustomerId(int $customerId): Invoice
+    public function setCustomerId(string $customerId): Invoice
     {
         $this->customerId = $customerId;
         return $this;
     }
+    /**
+     * @return string
+     */
+    public function getCustomerName(): string
+    {
+        return $this->customerName;
+    }
 
+    /**
+     * @param string $customerName
+     * @return Invoice
+     */
+    public function setCustomerName(string $customerName): Invoice
+    {
+        $this->customerName = $customerName;
+        return $this;
+    }
+
+     /**
+     * @return string
+     */
+    public function getCustomerEmail(): string
+    {
+        return $this->customerEmail;
+    }
+
+    /**
+     * @param string $customerEmail
+     * @return Invoice
+     */
+    public function setCustomerEmail(string $customerEmail): Invoice
+    {
+        $this->customerEmail = $customerEmail;
+        return $this;
+    }
     /**
      * @return int
      */

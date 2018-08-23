@@ -33,9 +33,9 @@ class InvoiceController extends Controller
 
         $invoice = $invoiceTransformer->transform($data);
 
-        $this->get('accounting.service.invoice')->create($invoice);
+        $success = $this->get('accounting.service.invoice')->create($invoice);
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
     /**
@@ -48,9 +48,9 @@ class InvoiceController extends Controller
 
         $command = new UpdateDateCommand($accountId, $invoiceId, new DateTime($body['date']), $body['pdfUrl']);
 
-        $this->get('accounting.service.invoice')->updateDate($command);
+        $success = $this->get('accounting.service.invoice')->updateDate($command);
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
     /**
@@ -63,11 +63,11 @@ class InvoiceController extends Controller
     {
         $body = json_decode($request->getContent(), true);
 
-        $command = new MarkPaidCommand($accountId, $invoiceId, $body['transactionId'], $body['pdfUrl']);
+        $command = new MarkPaidCommand($accountId, $invoiceId, $body['transactionId'], $body['paymentMethod'], $body['pdfUrl']);
 
-        $this->get('accounting.service.invoice')->markPaid($command);
+        $success = $this->get('accounting.service.invoice')->markPaid($command);
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => $success], $success ? 200 : 400);
     }
 
     /**

@@ -2,7 +2,10 @@
 
 namespace App\AccountingPlatform\CreditMemo;
 
-use App\AccountingPlatform\Library\OdooClient;
+use App\AccountingPlatform\Library\Odoo\OdooAccountDataFactory;
+use App\AccountingPlatform\Library\Odoo\OdooClient;
+use App\AccountingPlatform\Library\Odoo\OdooCommonTrait;
+use App\AccountingPlatform\Library\Odoo\OdooRepository;
 use App\Model\CreditMemo;
 use DateTime;
 
@@ -12,48 +15,76 @@ use DateTime;
  */
 class OdooAdapter implements AdapterInterface
 {
+    use OdooCommonTrait;
+
+    const PARTNER_TYPE = 'customer';
+    const PAYMENT_TYPE = 'outbound';
+    const INVOICE_TYPE = 'out_refund';
+
     /**
      * @var OdooClient
      */
     protected $odooClient;
 
     /**
+     * @var OdooAccountDataFactory
+     */
+    private $dataFactory;
+
+    /**
+     * @var OdooRepository
+     */
+    private $odooRepo;
+
+    /**
      * OdooAdapter constructor.
      * @param OdooClient $odooClient
      */
-    public function __construct(OdooClient $odooClient)
+    public function __construct(OdooClient $odooClient, OdooRepository $odooRepo, OdooAccountDataFactory $dataFactory)
     {
         $this->odooClient = $odooClient;
+        $this->dataFactory = $dataFactory;
+        $this->odooRepo = $odooRepo;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function create(CreditMemo $creditMemo): bool
     {
-        $creditMemo_date = $creditMemo->getCreditMemoDate();
-        // $key = key($invoice_date);
-        // $date = $invoice_date['$key'];
-        $date_creditmemo = $creditMemo_date->format('Y-m-d');
+        $accountData = $this->dataFactory->getAccountData($creditMemo->getAccountId());
+
+        if ($this->odooRepo->getCreditMemoByMagentoId($accountData->getAccountId(), $creditMemo->getCreditMemoId())) {
+            return false;
+        }
+
         // FIRST CREATE INVOICE
         $data = [
-            'type' => 'out_refund',
-            'account_id' => $creditMemo->getAccountId(),
-            'date_invoice' => $date_creditmemo,
+            'account_id' => $accountData->getAccountId(),
+            'date_invoice' => $creditMemo->getCreditMemoDate()->format('Y-m-d'),
             'pdfurl' => $creditMemo->getPdfUrl(),
-            'name' => $creditMemo->getOrderIncrementId(),
+            'name' => $creditMemo->getCreditMemoIncrementId(),
             'magento_so' => $creditMemo->getOrderId(),
             'magento_invoice_id' => $creditMemo->getCreditMemoId(),
-            'magento_increment_id' => $creditMemo->getCreditMemoIncrementId(),
-        ];
-        $criteria = [
-            ['name', '=ilike', $creditMemo->getCurrency()],
+            'magento_increment_id' => $creditMemo->getOrderIncrementId(), 
         ];
 
         $fields = ['id', 'active'];
-        // EACH SEARCH METHOD WE LIMIT ONLY 1 RECORD SO ITS OK TO HARDCODE THE INDEX = 0
-        $partner_id = $creditMemo->getCustomerId();
-        $partner = $this->odooClient->search_read('res.partner', [['id', '=', $partner_id],], $fields, 1);
 
-        if (sizeof($partner) > 0) {
-            $data['partner_id'] = $partner[0]['id'];
+        // Get or Create Customer
+        if ($partner = $this->odooRepo->getCustomerByMagentoId($creditMemo->getCustomerId())) {
+            $data['partner_id'] = $partner['id'];
+        } else {
+            $data['partner_id'] = $this->odooRepo->createCustomer(
+                $creditMemo->getCustomerId(),
+                $creditMemo->getCustomerName(),
+                $creditMemo->getCustomerEmail()
+            );
+        }
+
+        // Get Currency
+        if ($currency = $this->odooRepo->getCurrency($creditMemo->getCurrency())) {
+            $data['currency_id'] = $currency['id'];
         } else {
             return false;
         }
@@ -66,182 +97,112 @@ class OdooAdapter implements AdapterInterface
             trigger_error("you input wrong journal name, please correct it", E_USER_ERROR);
         }
 
-        $currency = $this->odooClient->search_read('res.currency', $criteria, $fields, 1);
-        if (sizeof($currency)) {
-            $data['currency_id'] = $currency[0]['id'];
+        $odooCreditMemoId = $this->odooRepo->createCreditMemo($data);
+
+        // SECOND CREATE INVOICE LINES/INVOICED PRODUCTS
+        $getjournal = $this->odooClient->search_read('account.journal', [['id', '=', $journal_id[0]['id']],], ['id', 'default_credit_account_id'], 1);
+        $defaultCreditAccountId = $getjournal[0]['default_credit_account_id'][0];
+
+        // Get Default Product
+        if ($product = $this->odooRepo->getProduct($accountData->getDefaultProductId())) {
+            $productId = $product['id'];
         } else {
             return false;
         }
 
-        $id = $this->odooClient->create('account.invoice', $data);
-        // SECOND CREATE INVOICE LINES/INVOICED PRODUCTS
-        $getjournal = $this->odooClient->search_read('account.journal', [['id', '=', $journal_id[0]['id']],], ['id', 'default_credit_account_id'], 1);
-        $default_credit_account_id = $getjournal[0]['default_credit_account_id'];
+        // Add Line Items
+        foreach ($creditMemo->getLineItems() as $lineItem) {
+            $this->addLineItem($lineItem, $odooCreditMemoId, $productId, $defaultCreditAccountId);
+        }
 
-        $lineItems = $creditMemo->getLineItems();
-        foreach ($lineItems as $lineItem) {
-            // SEARCH PRODUCT BY ITS SKU
-            $criteria = [
-                ['default_code', '=', $lineItem->getSku()],
-            ];
+        $this->odooClient->methods('account.invoice', 'compute_taxes', $odooCreditMemoId);
+        $this->odooClient->methods('account.invoice', 'action_invoice_open', $odooCreditMemoId);
 
-            $fields = ['id', 'description_sale'];
-
-            $product = $this->odooClient->search_read('product.product', $criteria, $fields, 1);
-
-            if (sizeof($product)) {
-                $product_id = $product[0]['id'];
-                $name = $product[0]['description_sale'];
-            } else {
-                return false;
-            }
-            $data_line = [
-                'invoice_id' => $id,
-                'product_id' => $product_id,
-                'name' => $name,
-                'account_id' => $default_credit_account_id[0],
-                'quantity' => $lineItem->getQuantity(),
-                'discount' => $lineItem->getDiscount(),
-                'price_unit' => $lineItem->getUnitPrice(),
-            ];
-            // SEARCH TAX MASTER DATA
-            $criteria = [
-                ['name', '=', $lineItem->getTaxIdentifier()],
-            ];
-
-            $fields = ['id'];
-
-            $tax = $this->odooClient->search_read('account.tax', $criteria, $fields, 1);
-            if (sizeof($tax)) {
-                $tax_ids = array(array(6, 0, array($tax[0]['id'])));
-            } else {
-                return false;
-            }
-            // IN ODOO, ORDER ITEMS CAN CONTAIN SEVERAL TAXES, SO WE NEED TO ASSIGN THE VALUE AS ARRAY AND ODOO FORMAT WHEN ASSIGNING VALUE TO MANY2MANY FIELD (6, 0, ARRAY OF ID VALUE)
-            $data_line['invoice_line_tax_ids'] = $tax_ids;
-            $line_id = $this->odooClient->create('account.invoice.line', $data_line);
+        if ($creditMemo->getStatus() === CreditMemo::STATUS_REFUNDED) {
+            // Refresh the Invoice as the value changed
+            $odooCreditMemo = $this->odooRepo->getInvoice($odooCreditMemoId);
+            // Mark as paid
+            $this->updateToPaid($odooCreditMemo, $creditMemo->getRefundTransactionId(), $creditMemo->getRefundMethod());
         }
 
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function updateDate(string $accountId, int $creditMemoId, DateTime $date, string $pdfLink): bool
     {
-        // TODO: Implement updateDate() method.
-        $update_invoice_date = $date->format('Y-m-d');
-        $data = [
-            'date_invoice' => $update_invoice_date,
-        ];
-        $this->odooClient->write('account.invoice', $creditMemoId, $data);
-        return true;
-    }
+        $accountData = $this->dataFactory->getAccountData($accountId);
 
-    public function markPaid(
-        string $accountId,
-        int $creditMemoId,
-        string $method,
-        string $transactionId,
-        string $pdfLink
-    ): bool {
-        $data = [
-            'accountId' => $accountId,
-            'creditMemoId' => $creditMemoId,
-            'status' => $status,
-            'transactionId' => $transactionId,
-            'pdfLink' => $pdfUrl,
-            'paymentType' => $paymentType,
-            'partnerType' => $partnerType
-        ];
+        $creditMemo = $this->odooRepo->getCreditMemoByMagentoId($accountData->getAccountId(), $creditMemoId);
 
-        // ============================= SEARCH DATA INVOICE ==============================
-        $fields = ['id', 'number', 'partner_id', 'account_id', 'date_invoice', 'journal_id', 'state', 'amount_total'];
-
-        $invoice = $this->odooClient->search_read(
-            'account.invoice',
-            [['id', '=', $creditMemoId]],
-            $fields,
-            1
-        );
-        $this->odooClient->methods(
-            'account.invoice',
-            'action_invoice_open',
-            $invoice[0]['id']
-        );
-        $invoice = $this->odooClient->search_read(
-            'account.invoice',
-            [['id', '=', $creditMemoId]],
-            $fields,
-            1
-        );
-
-        $invoice_partner_id = $invoice[0]['partner_id'][0];
-        $invoice_account_id = $invoice[0]['account_id'][0];
-        $invoice_journal_id = $invoice[0]['journal_id'][0];
-        $invoice_amount = $invoice[0]['amount_total'];
-        $invoice_number = $invoice[0]['number'];
-        $payment_date = date('Y-m-d'); # now
-
-        // # ============================= SEARCH DATA ACCOUNT JOURNAL ==============================
-        $payment_journal = $this->odooClient->search_read(
-            'account.journal',
-            [['id', '=', $data['transactionId']],], ['id', 'name', 'inbound_payment_method_ids'],
-            1
-        );
-        file_put_contents(
-            'markpaid_payment_method.txt',
-            print_r($payment_journal, true) . PHP_EOL,
-            FILE_APPEND | LOCK_EX
-        );
-        $payment_method = $payment_journal[0]['inbound_payment_method_ids'][0];
-
-        // # ============================= CREATE PAYMENT ==============================
-        $data_payment = [
-            'payment_date' => $payment_date,
-            'payment_method_id' => $payment_method,
-            'communication' => $invoice_number,
-            'invoice_ids' => array(array(4, $invoice[0]['id'], 0)),
-            'amount' => $invoice_amount,
-            'payment_type' => $data['paymentType'],
-            'partner_type' => $data['partnerType'],
-            'partner_id' => $invoice_partner_id,
-            'journal_id' => $accountId,
-        ];
-        $payment = $this->odooClient->create('account.payment', $data_payment);
-
-        $this->odooClient->methods(
-            'account.payment',
-            'action_validate_invoice_payment',
-            $payment
-        );
-        $payment_account = $this->odooClient->search_read('account.payment', [['id', '=', $payment],]);
-
-        $this->odooClient->methods(
-            'account.payment',
-            'post',
-            $payment_account[0]['id']
-        );
-
-        return true;
-    }
-
-    public function markPending(string $accountId, int $creditMemoId, string $pdfLink): bool
-    {
-        // TODO: Implement markPending() method.
-        return true;
-    }
-
-    public function markCancelled(string $accountId, int $creditMemoId, string $pdfLink): bool
-    {
-        $creditMemo = $this->odooClient->search_read(
-            'account.invoice',
-            [['id', '=', $creditMemoId], ['state', 'in', ['open', 'draft']]]
-        );
-
-        if (empty($creditMemo)) {
+        if (!$creditMemo) {
             return false;
         }
 
-        $this->odooClient->methods('account.invoice', 'action_invoice_cancel', $creditMemo[0]['id']);
+        $this->odooRepo->updateInvoice(
+            $creditMemo['id'],
+            [
+                'date_invoice' => $date->format('Y-m-d'),
+                'pdfurl' => $pdfLink,
+            ]
+        );
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function markPaid(string $accountId, int $creditMemoId, string $paymentMethod, string $transactionId, string $pdfLink): bool
+    {
+        $accountData = $this->dataFactory->getAccountData($accountId);
+
+        $creditMemo = $this->odooRepo->getCreditMemoByMagentoId($accountData->getAccountId(), $creditMemoId);
+
+        if (!$creditMemo) {
+            return false;
+        }
+
+        $this->updatePdfUrl($creditMemo, $pdfLink);
+
+        return $this->updateToPaid($creditMemo, $transactionId, $paymentMethod);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function markPending(string $accountId, int $creditMemoId, string $pdfLink): bool
+    {
+        $accountData = $this->dataFactory->getAccountData($accountId);
+
+        $creditMemo = $this->odooRepo->getCreditMemoByMagentoId($accountData->getAccountId(), $creditMemoId);
+
+        if (!$creditMemo) {
+            return false;
+        }
+
+        $this->updateToPending($creditMemo);
+        $this->updatePdfUrl($creditMemo, $pdfLink);
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function markCancelled(string $accountId, int $creditMemoId, string $pdfLink): bool
+    {
+        $accountData = $this->dataFactory->getAccountData($accountId);
+
+        $creditMemo = $this->odooRepo->getCreditMemoByMagentoId($accountData->getAccountId(), $creditMemoId);
+
+        if (!$creditMemo || !in_array($creditMemo['state'], ['open', 'draft'])) {
+            return false;
+        }
+
+        $this->updateToCancelled($creditMemo);
+        $this->updatePdfUrl($creditMemo, $pdfLink);
 
         return true;
     }

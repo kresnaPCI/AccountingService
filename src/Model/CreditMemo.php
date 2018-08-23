@@ -10,6 +10,10 @@ use DateTime;
  */
 class CreditMemo
 {
+    const STATUS_REFUNDED = 'refunded';
+    const STATUS_PENDING = 'pending';
+    const STATUS_CANCELLED = 'cancelled';
+
     /**
      * @var string
      */
@@ -78,18 +82,48 @@ class CreditMemo
     /**
      * @return int
      */
-    public function getCustomerId(): int
+    public function getCustomerId(): string
     {
         return $this->customerId;
     }
 
     /**
-     * @param int $customerId
+     * @param string $customerId
      * @return CreditMemo
      */
-    public function setCustomerId(int $customerId): CreditMemo
+    public function setCustomerId(string $customerId): CreditMemo
     {
         $this->customerId = $customerId;
+        return $this;
+    }
+
+    public function getCustomerName(): string
+    {
+        return $this->customerName;
+    }
+
+    /**
+     * @param string $customerName
+     * @return CreditMemo
+     */
+    public function setCustomerName(string $customerName): CreditMemo
+    {
+        $this->customerName = $customerName;
+        return $this;
+    }
+    
+    public function getCustomerEmail(): string
+    {
+        return $this->customerEmail;
+    }
+
+    /**
+     * @param string $customerEmail
+     * @return CreditMemo
+     */
+    public function setCustomerEmail(string $customerEmail): CreditMemo
+    {
+        $this->customerEmail = $customerEmail;
         return $this;
     }
 
@@ -147,48 +181,12 @@ class CreditMemo
         return $this;
     }
 
-     /**
-     * @return int
-     */
-    public function getInvoiceId(): int
-    {
-        return $this->invoiceId;
-    }
-
-    /**
-     * @param int $invoiceId
-     * @return Invoice
-     */
-    public function setInvoiceId(int $invoiceId): Invoice
-    {
-        $this->invoiceId = $invoiceId;
-        return $this;
-    }
-
     /**
      * @return DateTime
      */
     public function getCreditMemoDate(): DateTime
     {
         return $this->creditMemoDate;
-    }
-
-    /**
-     * @return string
-     */
-    public function getInvoiceIncrementId(): string
-    {
-        return $this->invoiceIncrementId;
-    }
-
-    /**
-     * @param string $invoiceIncrementId
-     * @return Invoice
-     */
-    public function setInvoiceIncrementId(string $invoiceIncrementId): Invoice
-    {
-        $this->invoiceIncrementId = $invoiceIncrementId;
-        return $this;
     }
 
     /**
